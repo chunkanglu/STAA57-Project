@@ -1,0 +1,58 @@
+---
+title: "Project"
+author: "Chun Kang Lu 1008161150"
+date: "2023-03-24"
+output: html_document
+---
+
+```{r, echo=F}
+library(tidyverse)
+```
+
+```{r}
+# We have to note the data was downloaded on March 24, and the dataset is updated every week, so future downloads may get slightly different results.
+data = read.csv("COVID19 cases.csv")
+head(data)
+```
+```{r}
+glimpse(data)
+```
+```{r}
+# Turn Episode.Date and Reported.Date into Date type
+data = data %>% mutate(Episode.Date = as.Date(Episode.Date, format = "%Y-%m-%d"),
+                       Reported.Date = as.Date(Reported.Date, format = "%Y-%m-%d"))
+head(data)
+```
+```{r}
+dim(data)
+```
+
+# About the Dataset
+
+Available [here](https://open.toronto.ca/dataset/covid-19-cases-in-toronto/), the COVID-19 Cases dataset provides weekly updating information about all reported cases of COVID-19 by the Toronto Public Health since the first reported case in January of 2020. The information in this dataset changes every week as new information get updated at 8:30 AM every Tuesday. For consistency in our analysis, we will be using the downloaded csv version of this dataset from March 24 in this report.
+
+This dataset contains 15 columns and 394761 rows, with each row representing a reported individual with COVID-19.
+
+The columns are as follows:
+* `_id` - A unique row identifier for Open Data database.
+* `Assigned_ID` - A unique ID assigned to cases by Toronto Public Health for the purposes of posting to Open Data, to allow for tracking of specific cases.
+* `Outbreak Associated` - Cases associated with outbreaks are identified by their settings and institutions (eg. long-term care homes, retirement homes, hospitals, homeless shelters, etc.).
+* `Age Group` - Age at time of illness. Age groups (in years): ≤19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, 80-89, 90+, unknown (blank)
+* `Neighbourhood Name` - Toronto is divided into 140 geographically distinct neighborhoods that were established to help government and community agencies with local planning by providing socio-economic data for a meaningful geographic area.
+* `FSA` - Forward sortation area (i.e. first three characters of postal code) based on the case's primary home address.
+* `Source of Infection` - The most likely way the person contracted COVID-19. These are determined through a few factors of a public health investigator's assessment, association with a confirmed COVID-19 outbreak, and known risk factors (like travel or close contact with another known COVID-19 case).
+* `Classification` - Categorization of the cases as confirmed or probable, according to standard criteria of the Ontario Ministry of Health.
+* `Episode Date` - Best estimate to when the disease was first acquired.
+* `Reported Date` - Date which the case was reported to Toronto Public Health.
+* `Client Gender` - Self-reported gender of the individual.
+* `Outcome` - 3 scenarios of fatal, resolved, and active. 
+    * Fatal means the individual has died directly due to COVID-19 and not an alternative cause of death. 
+    * Resolved refers to individuals who have either:
+        * Been marked Fatal but the cause of death was not due to COVID-19.
+        * Are alive and has been more than 14 days from the episode date and the case is not currently hospitalized, intubated, or in ICU.
+    * Active refers to all other ongoing cases
+* `Ever Hospitalized` - Cases that were hospitalized related to their COVID-19 infection (includes cases that are currently hospitalized and those that have been discharged or are deceased).
+* `Ever in ICU` - Cases that were admitted to the intensive care unit (ICU) related to their COVID-19 infection (includes cases that are currently in ICU and those that have been discharged or are deceased).
+* `Ever Intubated` - Cases that were intubated related to their COVID-19 infection (includes cases that are currently intubated and those that have been discharged or deceased)
+
+

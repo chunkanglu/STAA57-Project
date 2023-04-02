@@ -1,58 +1,380 @@
 ---
-title: "Project"
+title: "STAA57 Project"
 author: "Chun Kang Lu 1008161150"
 date: "2023-03-24"
 output: html_document
 ---
 
-```{r, echo=F}
+```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
 library(tidyverse)
+library(knitr)
+library(gridExtra)
+library(kableExtra)
+library(pROC)
 ```
 
-```{r}
+```{r, echo=FALSE}
 # We have to note the data was downloaded on March 24, and the dataset is updated every week, so future downloads may get slightly different results.
 data = read.csv("COVID19 cases.csv")
-head(data)
-```
-```{r}
-glimpse(data)
-```
-```{r}
 # Turn Episode.Date and Reported.Date into Date type
 data = data %>% mutate(Episode.Date = as.Date(Episode.Date, format = "%Y-%m-%d"),
                        Reported.Date = as.Date(Reported.Date, format = "%Y-%m-%d"))
-head(data)
-```
-```{r}
-dim(data)
+data = data %>% filter(Age.Group != "")
+
+main_data = data %>% filter(Outcome!="ACTIVE") %>% select(-c(X_id, Assigned_ID))
+gen_filtered = main_data %>% filter(Client.Gender %in% c("MALE", "FEMALE"))
 ```
 
 # About the Dataset
 
-Available [here](https://open.toronto.ca/dataset/covid-19-cases-in-toronto/), the COVID-19 Cases dataset provides weekly updating information about all reported cases of COVID-19 by the Toronto Public Health since the first reported case in January of 2020. The information in this dataset changes every week as new information get updated at 8:30 AM every Tuesday. For consistency in our analysis, we will be using the downloaded csv version of this dataset from March 24 in this report.
+Available [here](https://open.toronto.ca/dataset/covid-19-cases-in-toronto/), the COVID-19 Cases dataset provides weekly updating information about all reported cases of COVID-19 by the Toronto Public Health since the first reported case in January of 2020. The information in this dataset changes every week as new information get updated at 8:30 AM every Tuesday. For consistency in our analysis, we will be using the downloaded `.csv` version of this dataset from March 24 in this report.
 
 This dataset contains 15 columns and 394761 rows, with each row representing a reported individual with COVID-19.
 
 The columns are as follows:
-* `_id` - A unique row identifier for Open Data database.
-* `Assigned_ID` - A unique ID assigned to cases by Toronto Public Health for the purposes of posting to Open Data, to allow for tracking of specific cases.
-* `Outbreak Associated` - Cases associated with outbreaks are identified by their settings and institutions (eg. long-term care homes, retirement homes, hospitals, homeless shelters, etc.).
-* `Age Group` - Age at time of illness. Age groups (in years): ≤19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, 80-89, 90+, unknown (blank)
-* `Neighbourhood Name` - Toronto is divided into 140 geographically distinct neighborhoods that were established to help government and community agencies with local planning by providing socio-economic data for a meaningful geographic area.
-* `FSA` - Forward sortation area (i.e. first three characters of postal code) based on the case's primary home address.
-* `Source of Infection` - The most likely way the person contracted COVID-19. These are determined through a few factors of a public health investigator's assessment, association with a confirmed COVID-19 outbreak, and known risk factors (like travel or close contact with another known COVID-19 case).
-* `Classification` - Categorization of the cases as confirmed or probable, according to standard criteria of the Ontario Ministry of Health.
-* `Episode Date` - Best estimate to when the disease was first acquired.
-* `Reported Date` - Date which the case was reported to Toronto Public Health.
-* `Client Gender` - Self-reported gender of the individual.
-* `Outcome` - 3 scenarios of fatal, resolved, and active. 
-    * Fatal means the individual has died directly due to COVID-19 and not an alternative cause of death. 
-    * Resolved refers to individuals who have either:
-        * Been marked Fatal but the cause of death was not due to COVID-19.
-        * Are alive and has been more than 14 days from the episode date and the case is not currently hospitalized, intubated, or in ICU.
-    * Active refers to all other ongoing cases
-* `Ever Hospitalized` - Cases that were hospitalized related to their COVID-19 infection (includes cases that are currently hospitalized and those that have been discharged or are deceased).
-* `Ever in ICU` - Cases that were admitted to the intensive care unit (ICU) related to their COVID-19 infection (includes cases that are currently in ICU and those that have been discharged or are deceased).
-* `Ever Intubated` - Cases that were intubated related to their COVID-19 infection (includes cases that are currently intubated and those that have been discharged or deceased)
 
+-   `_id` - A unique row identifier for Open Data database.
 
+-   `Assigned_ID` - A unique ID assigned to cases by Toronto Public Health for the purposes of posting to Open Data, to allow for tracking of specific cases.
+
+-   `Outbreak Associated` - Cases associated with outbreaks are identified by their settings and institutions (eg. long-term care homes, retirement homes, hospitals, homeless shelters, etc.).
+
+-   `Age Group` - Age at time of illness. Age groups (in years): ≤19, 20-29, 30-39, 40-49, 50-59, 60-69, 70-79, 80-89, 90+, unknown (blank)
+
+-   `Neighbourhood Name` - Toronto is divided into 140 geographically distinct neighborhoods that were established to help government and community agencies with local planning by providing socio-economic data for a meaningful geographic area.
+
+-   `FSA` - Forward sortation area (i.e. first three characters of postal code) based on the case's primary home address.
+
+-   `Source of Infection` - The most likely way the person contracted COVID-19. These are determined through a few factors of a public health investigator's assessment, association with a confirmed COVID-19 outbreak, and known risk factors (like travel or close contact with another known COVID-19 case).
+
+-   `Classification` - Categorization of the cases as confirmed or probable, according to standard criteria of the Ontario Ministry of Health.
+
+-   `Episode Date` - Best estimate to when the disease was first acquired.
+
+-   `Reported Date` - Date which the case was reported to Toronto Public Health.
+
+-   `Client Gender` - Self-reported gender of the individual.
+
+-   `Outcome` - 3 scenarios of fatal, resolved, and active. - Fatal means the individual has died directly due to COVID-19 and not an alternative cause of death. - Resolved refers to individuals who have either: - Been marked Fatal but the cause of death was not due to COVID-19. - Are alive and has been more than 14 days from the episode date and the case is not currently hospitalized, intubated, or in ICU. - Active refers to all other ongoing cases
+
+-   `Ever Hospitalized` - Cases that were hospitalized related to their COVID-19 infection (includes cases that are currently hospitalized and those that have been discharged or are deceased).
+
+-   `Ever in ICU` - Cases that were admitted to the intensive care unit (ICU) related to their COVID-19 infection (includes cases that are currently in ICU and those that have been discharged or are deceased).
+
+-   `Ever Intubated` - Cases that were intubated related to their COVID-19 infection (includes cases that are currently intubated and those that have been discharged or deceased)
+
+# Main Question
+
+We sought to examine what factors seemed to be the most prevalent among cases who are classified *FATAL* as these could serve as predictors for which portion of the population COVID-19 is most dangerous towards.
+
+# Preliminary Analysis
+
+We chose to discard *ACTIVE* cases as these are people who have COVID-19 at the time of obtaining this CSV file, and we are unable to know if they will become *RESOLVED* or *FATAL* in the future.
+
+```{r, echo=FALSE}
+
+data_byAge = main_data %>% filter(Age.Group != "") %>% group_by(Age.Group) %>% summarise(TotalCases=n(), deathRate = mean(Outcome == "FATAL"))
+kbl(data_byAge) %>% 
+    kable_styling(full_width = F, font_size = 10)
+```
+
+\pagebreak
+
+```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
+ggplot(main_data %>% filter(Age.Group != ""), aes(x=Age.Group, fill=Age.Group)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    theme(axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+```
+
+```{r, echo=FALSE}
+                              # TABLES
+
+#Relation between location and death rate
+
+data_byLocation  = main_data %>% filter(FSA != "") %>%filter(Neighbourhood.Name != "")%>% mutate(location = paste(FSA, Neighbourhood.Name, sep = " - "))%>% group_by(location) %>% summarise(TotalCases=n(), deathRate = mean(Outcome == "FATAL") )
+
+topCaseLocation = data_byLocation %>% arrange(desc(TotalCases))
+kbl(topCaseLocation[1:10,]) %>% 
+    kable_styling(full_width = F, font_size = 10)
+```
+
+```{r, echo=FALSE}
+# Relation between gender and death rate
+data_byGender = data %>% filter(Client.Gender!="") %>% group_by(Client.Gender)%>%summarise( TotalCases=n(),deathRate = mean(Outcome == "FATAL"))
+kbl(data_byGender) %>% 
+    kable_styling(full_width = F, font_size = 10)
+```
+
+```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
+ggplot(data, aes(x=Client.Gender, fill=Client.Gender)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    theme(axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+```
+
+```{r, echo=FALSE}
+#GROUP BY Outbreak.Associated
+data_byOutbreakAssociated = data %>% filter(Outbreak.Associated!="") %>% group_by(Outbreak.Associated)%>%summarise( TotalCases=n(), deathRate = mean(Outcome == "FATAL"))
+kbl(data_byOutbreakAssociated) %>% 
+    kable_styling(full_width = F, font_size = 10)
+```
+
+```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
+ggplot(data, aes(x=Outbreak.Associated, fill=Outbreak.Associated)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    theme(axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+```
+
+```{r, echo=FALSE}
+#Goup By Source.of.Infection
+data_byInfection = data %>% filter(Source.of.Infection!="") %>% group_by(Source.of.Infection)%>%summarise( TotalCases=n(), deathRate = mean(Outcome == "FATAL"))
+
+kbl(data_byInfection %>% arrange(desc(TotalCases))) %>% 
+    kable_styling(full_width = F, font_size = 10)
+```
+
+```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
+ggplot(data, aes(x=Source.of.Infection, fill=Source.of.Infection)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    theme(axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+```
+
+```{r, echo=FALSE}
+#Relation between hospitalized and death rate
+data_byHospitalized = data %>% filter(Ever.Hospitalized!="") %>% group_by(Ever.Hospitalized)%>%summarise( TotalCases=n(),deathRate = mean(Outcome == "FATAL"))
+kbl(data_byHospitalized %>% arrange(desc(deathRate))) %>% 
+    kable_styling(full_width = F, font_size = 10)
+```
+
+```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
+ggplot(data, aes(x=Ever.Hospitalized, fill=Ever.Hospitalized)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    theme(axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+```
+
+```{r, echo=FALSE}
+#Relation between ICU and death rate
+  # data_check = data %>% filter(Ever.in.ICU =="Yes" && Ever.Hospitalized== "No") gives 0 obs which means in icu must be in         hospital
+
+#this case death rate is computed as before
+data_byICU = data %>% filter(Ever.in.ICU!="")  %>% group_by(Ever.in.ICU) %>% summarise( TotalCases=n(),deathRate = mean(Outcome   == "FATAL"))
+
+kbl(data_byICU %>% arrange(desc(deathRate))) %>% 
+    kable_styling(full_width = F, font_size = 10)
+```
+
+```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
+ggplot(data, aes(x=Ever.in.ICU, fill=Ever.in.ICU)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    theme(axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+```
+
+```{r, echo=FALSE, eval=FALSE}
+#death rate is computed by only considering the case that Ever.Hospitalized== "Yes"
+data_byICU_spec = data %>% filter(Ever.in.ICU!="") %>%  filter(Ever.Hospitalized== "Yes") %>% group_by(Ever.in.ICU) %>% summarise( TotalCases=n(),deathRate = mean(Outcome == "FATAL"))
+kable(data_byICU_spec %>% arrange(desc(deathRate)), caption = "ICU vs. Death Rate (Hospitalized)")
+```
+
+We can see that those admitted into ICU were also consider Hospitalized.
+
+```{r, echo=FALSE}
+#Relation between intubated and death rate
+  #data_check = data %>% filter(Ever.in.ICU =="No" && Ever.Hospitalized== "Yes") gives 0 obs which means intubated must be in icu
+
+data_byIntubated = data %>% filter(Ever.Intubated!="") %>% group_by(Ever.Intubated)%>%summarise( TotalCases=n(),deathRate = mean(Outcome == "FATAL"))
+
+kbl(data_byIntubated %>% arrange(desc(deathRate))) %>% 
+    kable_styling(full_width = F, font_size = 10)
+```
+
+```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
+ggplot(data, aes(x=Ever.Intubated, fill=Ever.Intubated)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    theme(axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+```
+
+```{r, echo=FALSE, eval=FALSE}
+   #death rate is computed by only considering the case that Ever.ICU== "Yes"
+data_byIntubated_spec = data %>% filter(Ever.Intubated!="") %>% filter(Ever.in.ICU=="Yes") %>%   group_by(Ever.Intubated)%>%summarise( TotalCases=n(),deathRate = mean(Outcome == "FATAL"))
+kable(data_byIntubated_spec %>% arrange(desc(deathRate)), caption = "Intubated vs. Death Rate (ICU)")
+```
+
+We can see that all cases that were intubated were admitted into ICU.
+
+```{r, fig.height=30, fig.width=10, echo=FALSE, eval=FALSE}
+# USED ABOVE
+OA_plot = ggplot(data, aes(x=Outbreak.Associated, fill=Outbreak.Associated)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    theme(axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+
+AGE_plot = ggplot(data, aes(x=Age.Group, fill=Age.Group)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    theme(axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+
+INF_plot = ggplot(data, aes(x=Source.of.Infection, fill=Source.of.Infection)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    theme(axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+
+GEN_plot = ggplot(data, aes(x=Client.Gender, fill=Client.Gender)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    theme(axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+
+HOS_plot = ggplot(data, aes(x=Ever.Hospitalized, fill=Ever.Hospitalized)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    theme(axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+
+ICU_plot = ggplot(data, aes(x=Ever.in.ICU, fill=Ever.in.ICU)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    theme(axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+
+INT_plot = ggplot(data, aes(x=Ever.Intubated, fill=Ever.Intubated)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    theme(axis.text.x=element_blank(),
+          axis.title.x=element_blank())
+
+grid.arrange(OA_plot, AGE_plot, INF_plot, GEN_plot, HOS_plot, ICU_plot, INT_plot, ncol=1)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+data_res = data %>% filter(Outcome=="RESOLVED")
+data_fat = data %>% filter(Outcome=="FATAL")
+data_act = data %>% filter(Outcome=="ACTIVE")
+```
+
+```{r, fig.height=30, fig.width=10,echo=FALSE, eval=FALSE}
+
+EP_res_plot = ggplot(data_res, aes(x=Episode.Date)) +
+    geom_bar() +
+    labs(title="RESOLVED")
+
+EP_fat_plot = ggplot(data_fat, aes(x=Episode.Date)) +
+    geom_bar() +
+    labs(title="FATAL")
+
+EP_act_plot = ggplot(data_act, aes(x=Episode.Date)) +
+    geom_bar() +
+    labs(title="ACTIVE")
+
+REP_res_plot = ggplot(data_res, aes(x=Reported.Date)) +
+    geom_bar() 
+
+REP_fat_plot = ggplot(data_fat, aes(x=Reported.Date)) +
+    geom_bar() 
+
+REP_act_plot = ggplot(data_act, aes(x=Reported.Date)) +
+    geom_bar() 
+
+grid.arrange(EP_res_plot, REP_res_plot, EP_fat_plot, REP_fat_plot, EP_act_plot, REP_act_plot, ncol=1)
+```
+
+# Regression Analysis
+
+As we can see from the figure below, there are magnitudes more RESOLVED cases than FATAL cases, creating a really imbalanced dataset.
+
+```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
+outcome_count = main_data %>% group_by(Outcome) %>% summarize(Count=n())
+kbl(outcome_count) %>% 
+    kable_styling(full_width = F, font_size = 10)
+```
+
+From such, we use boostrapping to oversample the FATAL cases and undersample the RESOLVED cases to create a more balanced dataset and allow for our logistic regression model to fit to the data.
+
+Using 8000 cases from each category, we fit a model on *Outbreak Associated, Age Group, Client Gender, Episode Date, Ever Hospitalized, Ever in ICU, and Ever Intubated* to determine which seem to have the highest correlation to Outcome. *Client Gender* was limited to only Male and Female as the other categories do not contain enough samples to draw conclusions. Both ID columns were not used as they are not relevant. *Neighbourhood name* and *FSA* both contain too many categories to draw significant correlations. *Reported Date* and *Episode Date* were not included as a logistic regression model will not be able to capture the time series data very well.
+
+```{r, echo=FALSE}
+main_res = gen_filtered %>% filter(Outcome=="RESOLVED")
+main_fat = gen_filtered %>% filter(Outcome=="FATAL")
+```
+
+```{r, echo=FALSE}
+set.seed(5)
+
+boot_res = main_res %>% sample_n(8000, replace=T)
+boot_fat = main_fat %>% sample_n(8000, replace=T)
+boot_data = rbind(boot_res, boot_fat)
+boot_data = boot_data %>% mutate(out = ifelse(Outcome == "FATAL", 1, 0))
+    
+model = glm(out ~ Outbreak.Associated + Age.Group + Client.Gender +  Ever.Hospitalized + Ever.in.ICU + Ever.Intubated,
+            family=binomial, data = boot_data)
+summary(model)
+```
+
+Following analysis on prior tables and graphs, we can see that FATAL cases are most prevalent in those who were in an outbreak, older age, male, as well as being hospitalized in ICU, being intubated. The highest correlation being those in the Age Group of 90 and older as that category contains the hightest log-odds at 6.54917 with respect to a FATAL outcome out of all variables.
+
+Since p-values for all categories aside from *Age Group 20 to 29 Years* are very low, we can safely reject the null hypothesis in that those categories have zero correlation to the *Outcome* of the case. We can similarly obtain this conclusion by seeing that 0 is not within the confidence intervals of these categories.
+
+```{r, message=FALSE, warning=FALSE, echo=FALSE}
+confint(model)
+```
+
+# Model Prediction Accuracy
+
+Using the same format of data, we perform cross-validation with a 70/30 train-test split to measure the accuracy of the model.
+
+```{r, fig.align='center', message=FALSE, warning=FALSE, echo=FALSE}
+set.seed(5)
+boot_res = main_res %>% sample_n(8000, replace=T)
+boot_fat = main_fat %>% sample_n(8000, replace=T)
+boot_data = rbind(boot_res, boot_fat)
+boot_data = boot_data %>% mutate(out = ifelse(Outcome == "FATAL", 1, 0))
+
+boot_data = boot_data %>% mutate(group_ind = sample(c("train","test"),
+                size=nrow(boot_data),
+                prob = c(0.7,0.3),
+                replace = T))
+
+train = boot_data %>% filter(group_ind == "train")
+test = boot_data %>% filter(group_ind == "test")
+    
+model2 = glm(out ~ Outbreak.Associated + Age.Group + Client.Gender + Ever.Hospitalized + Ever.in.ICU + Ever.Intubated,
+            family=binomial, data = train)
+
+test = test %>% mutate(pred = predict(model, newdata = test, type="response"))
+
+roc_logit = roc(test$out ~ test$pred)
+ggroc(roc_logit, color="red", size = 2)
+```
+
+```{r, echo=FALSE}
+auc(roc_logit)
+```
+
+The model performs very well. Choosing a cutoff point of 0.9, we get the following confusion matrix.
+
+```{r, echo=FALSE}
+test = test %>% mutate(pred_out = ifelse(pred >= 0.9, 1, 0))
+conmat = table(test$out, test$pred_out)
+conmat
+```
+
+And and overall accuracy of:
+
+```{r, echo=FALSE}
+sum(diag(conmat))/sum(conmat)
+```

@@ -1,27 +1,32 @@
 Assignment description
 As a group(or individual), find a dataset(or multiple datasets) from https://open.toronto.ca/ and using the dataset(s) demonstrate the use of the tools that you have learned in this course. Your report/work must include:
 
-* Description of the variables and the data
+* Description of the variables and the data DONE
 
-* A little background about the data (who collected it in what context)
+* A little background about the data (who collected it in what context) DONE
 
-* What is the over all research question that you are trying to answer in your report
+* What is the over all research question that you are trying to answer in your report DONE
 
-* Few tables (appropriately labeled)
+* Few tables (appropriately labeled) DONE
 
-* Few graphs (appropriately labeled)
+* Few graphs (appropriately labeled) DONE
 
-* Use of confidence interval and test of hypothesis
+* Use of confidence interval and test of hypothesis SOMEWHAT I THINK
 
-* Use of bootstrapping
+* Use of bootstrapping DONE
 
 * Use of regression analysis (linear or nonlinear regression [week-9] or logistic regression[week-10]). Interpretation of the regression parameters
+DONE
 
 * Use of cross validation
+    * split into train & test set for model with only useful variables
+DONE
 
 * A final summary of your findings
+TODO
 
 * An appendix which shows all your codes
+TODO
 
 3 marks will be kept aside for the presentation of your report (e.g. proper title, subtitle, graph size, graph placing, line spacing, proper annotation of your code etc.)
 

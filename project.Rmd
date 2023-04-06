@@ -111,7 +111,7 @@ kbl(data_byGender) %>%
 ```{r, echo=FALSE, message=FALSE,warning=FALSE}
 # Relation between gender+age and death rate
 data_byGender_Age = main_data %>% filter(Client.Gender!="") %>% group_by(Client.Gender,Age.Group)%>%summarise( TotalCases=n(),deathRate = mean(Outcome == "FATAL")) %>% arrange(desc(deathRate))
-kbl(data_byGender) %>% 
+kbl(data_byGender_Age) %>% 
     kable_styling(full_width = F, font_size = 10)
 ```
 

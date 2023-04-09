@@ -4,6 +4,15 @@ author: "Chun Kang Lu 1008161150"
 date: "2023-03-24"
 output: html_document
 ---
+<style type="text/css">
+   .main-container {max-width: 100%;}
+   .row {display: flex;}
+   .column {
+        flex: 50%;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
 
 ```{r results='hide', message=FALSE, warning=FALSE, echo=FALSE}
 library(tidyverse)
@@ -72,6 +81,8 @@ We sought to examine what factors seemed to be the most prevalent among cases wh
 
 We chose to discard *ACTIVE* cases as these are people who have COVID-19 at the time of obtaining this CSV file, and we are unable to know if they will become *RESOLVED* or *FATAL* in the future.
 
+<div class = "row">
+<div class = "column">
 ```{r, echo=FALSE}
 data_byAge = main_data %>% filter(Age.Group != "") %>% group_by(Age.Group) %>% summarise(TotalCases=n(), deathRate = mean(Outcome == "FATAL"))%>%arrange(desc(deathRate))
 
@@ -80,8 +91,8 @@ kbl(data_byAge) %>%
 
 
 ```
-
-
+</div>
+<div class = "column">
 ```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
 
 
@@ -92,29 +103,50 @@ kbl(data_byAge) %>%
 #          axis.title.x=element_blank())
 ggplot(data_byAge, aes(x = Age.Group, y = deathRate, fill=Age.Group)) +
   geom_bar(stat = "identity", alpha = 0.7) +
-  labs( x = "Age Group", y = "Death Rate") +
+  labs(title = "Age Group vs. Death Rate", x = "Age Group", y = "Death Rate") +
   theme_minimal()+
-  theme(axis.text.x=element_blank(),
-          axis.title.x=element_blank())
+  theme(axis.text.x=element_blank())
 
 ```
-
-
+</div>
+</div>
+<div class = "row">
+<div class = "column">
 ```{r, echo=FALSE}
 # Relation between gender and death rate
 data_byGender = main_data %>% filter(Client.Gender!="") %>% group_by(Client.Gender)%>%summarise( TotalCases=n(),deathRate = mean(Outcome == "FATAL"))%>%arrange(desc(deathRate))
 kbl(data_byGender) %>% 
     kable_styling(full_width = F, font_size = 10)
 ```
+</div>
+<div class = "column">
+```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
+#ggplot(data, aes(x=Client.Gender, fill=Client.Gender)) +
+#    geom_bar(position = "dodge") +
+#    facet_wrap(~Outcome, scales="free_y") +
+#    theme(axis.text.x=element_blank(),
+#          axis.title.x=element_blank())
+
+ggplot(data_byGender, aes(x = Client.Gender, y = deathRate, fill=Client.Gender)) +
+  geom_bar(stat = "identity", alpha = 0.7) +
+  labs(title = "Gender vs. Death Rate", x = "Gender Group", y = "Death Rate") +
+  theme_minimal()+
+  theme(axis.text.x=element_blank())
 
 
+```
+</div>
+</div>
+<div class = "row">
+<div class = "column">
 ```{r, echo=FALSE, message=FALSE,warning=FALSE}
 # Relation between gender+age and death rate
 data_byGender_Age = main_data %>% filter(Client.Gender!="") %>% group_by(Client.Gender,Age.Group)%>%summarise( TotalCases=n(),deathRate = mean(Outcome == "FATAL")) %>% arrange(desc(deathRate))
-kbl(data_byGender_Age) %>% 
+kbl(data_byGender_Age[1:10,]) %>% 
     kable_styling(full_width = F, font_size = 10)
 ```
-
+</div>
+<div class = "column">
 ```{r, echo=FALSE}
                               # TABLES
 
@@ -125,32 +157,18 @@ topCaseLocation = data_byLocation %>% arrange(desc(TotalCases))
 kbl(topCaseLocation[1:10,]) %>% 
     kable_styling(full_width = F, font_size = 10)
 ```
-
-
-```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
-#ggplot(data, aes(x=Client.Gender, fill=Client.Gender)) +
-#    geom_bar(position = "dodge") +
-#    facet_wrap(~Outcome, scales="free_y") +
-#    theme(axis.text.x=element_blank(),
-#          axis.title.x=element_blank())
-
-ggplot(data_byGender, aes(x = Client.Gender, y = deathRate, fill=Client.Gender)) +
-  geom_bar(stat = "identity", alpha = 0.7) +
-  labs( x = "Gender Group", y = "Death Rate") +
-  theme_minimal()+
-  theme(axis.text.x=element_blank(),
-          axis.title.x=element_blank())
-
-
-```
-
+</div>
+</div>
+<div class = "row">
+<div class = "column">
 ```{r, echo=FALSE}
 #GROUP BY Outbreak.Associated
 data_byOutbreakAssociated = main_data %>% filter(Outbreak.Associated!="") %>% group_by(Outbreak.Associated)%>%summarise( TotalCases=n(), deathRate = mean(Outcome == "FATAL"))%>% arrange(desc(deathRate))
 kbl(data_byOutbreakAssociated) %>% 
     kable_styling(full_width = F, font_size = 10)
 ```
-
+</div>
+<div class = "column">
 ```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
 #ggplot(data, aes(x=Outbreak.Associated, fill=Outbreak.Associated)) +
 #    geom_bar(position = "dodge") +
@@ -161,36 +179,43 @@ kbl(data_byOutbreakAssociated) %>%
 
 ggplot(data_byOutbreakAssociated, aes(x = Outbreak.Associated, y = deathRate, fill=Outbreak.Associated)) +
   geom_bar(stat = "identity", alpha = 0.7) +
-  labs( x = "Outbreak.Associated", y = "Death Rate") +
+  labs(title = "Outbreak Associated vs. Death Rate", x = "Outbreak.Associated", y = "Death Rate") +
   theme_minimal()+
-  theme(axis.text.x=element_blank(),
-          axis.title.x=element_blank())
+  theme(axis.text.x=element_blank())
 
 ```
-
+</div>
+</div>
+<div class = "row">
+<div class = "column">
 ```{r, echo=FALSE}
-#Goup By Source.of.Infection
+#Group By Source.of.Infection
 data_byInfection = main_data %>% filter(Source.of.Infection!="") %>% group_by(Source.of.Infection)%>%summarise( TotalCases=n(), deathRate = mean(Outcome == "FATAL"))%>% arrange(desc(TotalCases))
 
 kbl(data_byInfection %>% arrange(desc(TotalCases))) %>% 
     kable_styling(full_width = F, font_size = 10)
 ```
-
+</div>
+<div class = "column">
 ```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
 ggplot(main_data, aes(x=Source.of.Infection, fill=Source.of.Infection)) +
     geom_bar(position = "dodge") +
     facet_wrap(~Outcome, scales="free_y") +
-    theme(axis.text.x=element_blank(),
-          axis.title.x=element_blank())
+    labs(title = "Source of Infection vs. # of cases")+
+    theme(axis.text.x=element_blank())
 ```
-
+</div>
+</div>
+<div class = "row">
+<div class = "column">
 ```{r, echo=FALSE}
 #Relation between hospitalized and death rate
 data_byHospitalized = main_data %>% filter(Ever.Hospitalized!="") %>% group_by(Ever.Hospitalized)%>%summarise( TotalCases=n(),deathRate = mean(Outcome == "FATAL")) %>%arrange(desc(deathRate))
 kbl(data_byHospitalized %>% arrange(desc(deathRate))) %>% 
     kable_styling(full_width = F, font_size = 10)
 ```
-
+</div>
+<div class = "column">
 ```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
 #ggplot(main_data, aes(x=Ever.Hospitalized, fill=Ever.Hospitalized)) +
 #    geom_bar(position = "dodge") +
@@ -201,13 +226,15 @@ kbl(data_byHospitalized %>% arrange(desc(deathRate))) %>%
 
 ggplot(data_byHospitalized, aes(x = Ever.Hospitalized, y = deathRate, fill=Ever.Hospitalized)) +
   geom_bar(stat = "identity", alpha = 0.7) +
-  labs( x = "Ever.Hospitalized", y = "Death Rate") +
+  labs(title = "Hospitalized vs. Death Rate", x = "Ever.Hospitalized", y = "Death Rate") +
   theme_minimal()+
-  theme(axis.text.x=element_blank(),
-          axis.title.x=element_blank())
+  theme(axis.text.x=element_blank())
 
 ```
-
+</div>
+</div>
+<div class = "row">
+<div class = "column">
 ```{r, echo=FALSE}
 #Relation between ICU and death rate
   # data_check = data %>% filter(Ever.in.ICU =="Yes" && Ever.Hospitalized== "No") gives 0 obs which means in icu must be in         hospital
@@ -220,7 +247,8 @@ kbl(data_byICU %>% arrange(desc(deathRate))) %>%
     kable_styling(full_width = F, font_size = 10)
 
 ```
-
+</div>
+<div class = "column">
 ```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
 #ggplot(data, aes(x=Ever.in.ICU, fill=Ever.in.ICU)) +
 #    geom_bar(position = "dodge") +
@@ -230,15 +258,14 @@ kbl(data_byICU %>% arrange(desc(deathRate))) %>%
 
 ggplot(data_byICU, aes(x = Ever.in.ICU, y = deathRate, fill=Ever.in.ICU)) +
   geom_bar(stat = "identity", alpha = 0.7) +
-  labs( x = "Ever.in.ICU", y = "Death Rate") +
+  labs(title = "ICU vs. Death Rate", x = "Ever.in.ICU", y = "Death Rate") +
   theme_minimal()+
-  theme(axis.text.x=element_blank(),
-          axis.title.x=element_blank())
+  theme(axis.text.x=element_blank())
 ```
-
-
-We can see that those admitted into ICU were also consider Hospitalized.
-
+</div>
+</div>
+<div class = "row">
+<div class = "column">
 ```{r, echo=FALSE}
 #Relation between intubated and death rate
   #data_check = data %>% filter(Ever.in.ICU =="No" && Ever.Hospitalized== "Yes") gives 0 obs which means intubated must be in icu
@@ -248,7 +275,8 @@ data_byIntubated = main_data %>% filter(Ever.Intubated!="") %>% filter(Ever.in.I
 kbl(data_byIntubated %>% arrange(desc(deathRate))) %>% 
     kable_styling(full_width = F, font_size = 10)
 ```
-
+</div>
+<div class = "column">
 ```{r, fig.height=3, fig.width=7, fig.align='center', echo=FALSE}
 #ggplot(data, aes(x=Ever.Intubated, fill=Ever.Intubated)) +
 #    geom_bar(position = "dodge") +
@@ -258,15 +286,12 @@ kbl(data_byIntubated %>% arrange(desc(deathRate))) %>%
 
 ggplot(data_byIntubated, aes(x = Ever.Intubated, y = deathRate, fill=Ever.Intubated)) +
   geom_bar(stat = "identity", alpha = 0.7) +
-  labs( x = "Ever.Intubated", y = "Death Rate") +
+  labs(title = "Intubated vs. Death Rate", x = "Ever.Intubated", y = "Death Rate") +
   theme_minimal()+
-  theme(axis.text.x=element_blank(),
-          axis.title.x=element_blank())
+  theme(axis.text.x=element_blank())
 ```
-
-
-
-We can see that all cases that were intubated were admitted into ICU.
+</div>
+</div>
 
 ```{r, fig.height=30, fig.width=10, echo=FALSE, eval=FALSE}
 # USED ABOVE
@@ -347,6 +372,8 @@ REP_act_plot = ggplot(data_act, aes(x=Reported.Date)) +
 grid.arrange(EP_res_plot, REP_res_plot, EP_fat_plot, REP_fat_plot, EP_act_plot, REP_act_plot, ncol=1)
 ```
 
+\pagebreak
+
 # Regression Analysis
 
 As we can see from the figure below, there are magnitudes more RESOLVED cases than FATAL cases, creating a really imbalanced dataset.
@@ -360,6 +387,8 @@ kbl(outcome_count) %>%
 From such, we use boostrapping to oversample the FATAL cases and undersample the RESOLVED cases to create a more balanced dataset and allow for our logistic regression model to fit to the data.
 
 Using 8000 cases from each category, we fit a model on *Outbreak Associated, Age Group, Client Gender, Episode Date, Ever Hospitalized, Ever in ICU, and Ever Intubated* to determine which seem to have the highest correlation to Outcome. *Client Gender* was limited to only Male and Female as the other categories do not contain enough samples to draw conclusions. Both ID columns were not used as they are not relevant. *Neighbourhood name* and *FSA* both contain too many categories to draw significant correlations. *Reported Date* and *Episode Date* were not included as a logistic regression model will not be able to capture the time series data very well.
+
+We can also use this opportunity to test the correlation between the each independent variable and their Outcome, as well as examine the confidence interval of the correlation.
 
 ```{r, echo=FALSE}
 main_res = gen_filtered %>% filter(Outcome=="RESOLVED")
@@ -386,6 +415,8 @@ Since p-values for all categories aside from *Age Group 20 to 29 Years* are very
 ```{r, message=FALSE, warning=FALSE, echo=FALSE}
 confint(model)
 ```
+
+\pagebreak
 
 # Model Prediction Accuracy
 
@@ -432,3 +463,198 @@ And and overall accuracy of:
 ```{r, echo=FALSE}
 sum(diag(conmat))/sum(conmat)
 ```
+
+\pagebreak
+
+# Results
+
+The COVID-19 pandemic has affected people of all ages and genders across the world, and people are striving to develop effective public health strategies to combat the COVID-19 pandemic. To achieve this, we need to understand how factors such as age, gender, and exposure to outbreaks can affect the death and resolution rates of COVID-19 patients.
+
+One significant discovery in our project is that age plays a crucial role in determining the death rate. The elderly, particularly those between the ages of 80 and 89, have a higher risk of mortality compared to other age groups, possibly due to their weakened immune systems. On the other hand, young adults aged 20 to 29 tend to have a higher chance of recovery and a lower risk of death, suggesting that they are less susceptible to the severe impact of the virus.
+
+We have also analyzed the impact of gender on death rates due to COVID-19. Although the death rate is slightly higher for males than females, this difference is not significant enough to be considered a major determinant of fatality from the disease. Thus, when we then analyze the outcome of the disease by grouping age and gender, we found that the role of gender is not significant; the death rate is mainly determined by age but not gender.
+
+Furthermore, exposure to outbreaks is a crucial factor that affects the death rate from COVID-19. Those who have been present in an outbreak have a significantly higher death rate, almost seven times higher than those who were not. Moreover, the highest death rates occur during outbreaks and in some community settings, highlighting that most people contract COVID-19 in the community.
+
+Additionally, individuals requiring hospitalization, ICU admission, or intubation have a higher death rate. This is not surprising, as these cases typically represent more severe forms of the disease. When examining hospitalized cases, the death rate is higher among those who were admitted to the ICU or required intubation than those who were not. These observations imply that early medical intervention and hospitalization could be vital in enhancing the chances of recovery from COVID-19.
+
+\pagebreak
+
+# Appendix
+```{r, eval=FALSE}
+library(tidyverse)
+library(knitr)
+library(gridExtra)
+library(kableExtra)
+library(pROC)
+library(leaflet)
+# We have to note the data was downloaded on March 24, and the dataset is updated every week, so future downloads may get slightly different results.
+data = read.csv("COVID19 cases.csv")
+# Turn Episode.Date and Reported.Date into Date type
+data = data %>% mutate(Episode.Date = as.Date(Episode.Date, format = "%Y-%m-%d"),
+                       Reported.Date = as.Date(Reported.Date, format = "%Y-%m-%d"))
+data = data %>% filter(Age.Group != "")
+main_data = data %>% filter(Outcome!="ACTIVE") %>% select(-c(X_id, Assigned_ID))
+gen_filtered = main_data %>% filter(Client.Gender %in% c("MALE", "FEMALE"))
+```
+
+```{r, eval=FALSE}
+# Tables & Graphs
+# Relation between Age and death rate
+data_byAge = main_data %>% filter(Age.Group != "") %>% group_by(Age.Group) %>% summarise(TotalCases=n(), deathRate = mean(Outcome == "FATAL"))%>%arrange(desc(deathRate))
+
+kbl(data_byAge) %>% 
+    kable_styling(full_width = F, font_size = 10)
+
+ggplot(data_byAge, aes(x = Age.Group, y = deathRate, fill=Age.Group)) +
+  geom_bar(stat = "identity", alpha = 0.7) +
+  labs(title = "Age Group vs. Death Rate", x = "Age Group", y = "Death Rate") +
+  theme_minimal()+
+  theme(axis.text.x=element_blank())
+
+```
+```{r, eval=FALSE}
+# Relation between Gender and death rate
+data_byGender = main_data %>% filter(Client.Gender!="") %>% group_by(Client.Gender)%>%summarise( TotalCases=n(),deathRate = mean(Outcome == "FATAL"))%>%arrange(desc(deathRate))
+
+kbl(data_byGender) %>% 
+    kable_styling(full_width = F, font_size = 10)
+
+ggplot(data_byGender, aes(x = Client.Gender, y = deathRate, fill=Client.Gender)) +
+  geom_bar(stat = "identity", alpha = 0.7) +
+  labs(title = "Gender vs. Death Rate", x = "Gender Group", y = "Death Rate") +
+  theme_minimal()+
+  theme(axis.text.x=element_blank())
+
+```
+```{r, eval=FALSE}
+# Relation between gender and age vs. death rate
+data_byGender_Age = main_data %>% filter(Client.Gender!="") %>% group_by(Client.Gender,Age.Group)%>%summarise( TotalCases=n(),deathRate = mean(Outcome == "FATAL")) %>% arrange(desc(deathRate))
+kbl(data_byGender_Age[1:10,]) %>% 
+    kable_styling(full_width = F, font_size = 10)
+
+#Relation between location and total case
+data_byLocation  = main_data %>% filter(FSA != "") %>%filter(Neighbourhood.Name != "")%>% mutate(location = paste(FSA, Neighbourhood.Name, sep = " - "))%>% group_by(location) %>% summarise(TotalCases=n())
+
+topCaseLocation = data_byLocation %>% arrange(desc(TotalCases))
+kbl(topCaseLocation[1:10,]) %>% 
+    kable_styling(full_width = F, font_size = 10)
+
+```
+```{r, eval=FALSE}
+# Relation between Outbreak Associated and death rate
+data_byOutbreakAssociated = main_data %>% filter(Outbreak.Associated!="") %>% group_by(Outbreak.Associated)%>%summarise( TotalCases=n(), deathRate = mean(Outcome == "FATAL"))%>% arrange(desc(deathRate))
+
+kbl(data_byOutbreakAssociated) %>% 
+    kable_styling(full_width = F, font_size = 10)
+
+ggplot(data_byOutbreakAssociated, aes(x = Outbreak.Associated, y = deathRate, fill=Outbreak.Associated)) +
+  geom_bar(stat = "identity", alpha = 0.7) +
+  labs(title = "Outbreak Associated vs. Death Rate", x = "Outbreak.Associated", y = "Death Rate") +
+  theme_minimal()+
+  theme(axis.text.x=element_blank())
+
+```
+```{r, eval=FALSE}
+# Relation between Source of Infection and Number of cases
+data_byInfection = main_data %>% filter(Source.of.Infection!="") %>% group_by(Source.of.Infection)%>%summarise( TotalCases=n(), deathRate = mean(Outcome == "FATAL"))%>% arrange(desc(TotalCases))
+
+kbl(data_byInfection %>% arrange(desc(TotalCases))) %>% 
+    kable_styling(full_width = F, font_size = 10)
+
+ggplot(main_data, aes(x=Source.of.Infection, fill=Source.of.Infection)) +
+    geom_bar(position = "dodge") +
+    facet_wrap(~Outcome, scales="free_y") +
+    labs(title = "Source of Infection vs. # of cases")+
+    theme(axis.text.x=element_blank())
+
+```
+```{r, eval=FALSE}
+# Relation between hospitalized and death rate
+data_byHospitalized = main_data %>% filter(Ever.Hospitalized!="") %>% group_by(Ever.Hospitalized)%>%summarise( TotalCases=n(),deathRate = mean(Outcome == "FATAL")) %>%arrange(desc(deathRate))
+
+kbl(data_byHospitalized %>% arrange(desc(deathRate))) %>% 
+    kable_styling(full_width = F, font_size = 10)
+
+ggplot(data_byHospitalized, aes(x = Ever.Hospitalized, y = deathRate, fill=Ever.Hospitalized)) +
+  geom_bar(stat = "identity", alpha = 0.7) +
+  labs(title = "Hospitalized vs. Death Rate", x = "Ever.Hospitalized", y = "Death Rate") +
+  theme_minimal()+
+  theme(axis.text.x=element_blank())
+
+```
+```{r, eval=FALSE}
+# Relation between ICU and death rate
+# data_check = data %>% filter(Ever.in.ICU =="Yes" && Ever.Hospitalized== "No") gives 0 obs which means in icu must be in hospital
+# death rate is computed by only considering the case that Ever.Hospitalized== "Yes"
+data_byICU = main_data %>% filter(Ever.in.ICU!="") %>%  filter(Ever.Hospitalized== "Yes") %>% group_by(Ever.in.ICU) %>%         summarise( TotalCases=n(),deathRate = mean(Outcome == "FATAL"))
+
+kbl(data_byICU %>% arrange(desc(deathRate))) %>% 
+    kable_styling(full_width = F, font_size = 10)
+
+ggplot(data_byICU, aes(x = Ever.in.ICU, y = deathRate, fill=Ever.in.ICU)) +
+  geom_bar(stat = "identity", alpha = 0.7) +
+  labs(title = "ICU vs. Death Rate", x = "Ever.in.ICU", y = "Death Rate") +
+  theme_minimal()+
+  theme(axis.text.x=element_blank())
+
+```
+```{r, eval=FALSE}
+# Relation between intubated and death rate
+# data_check = data %>% filter(Ever.in.ICU =="No" && Ever.Hospitalized== "Yes") gives 0 obs which means intubated must be in icu
+data_byIntubated = main_data %>% filter(Ever.Intubated!="") %>% filter(Ever.in.ICU=="Yes") %>%   group_by(Ever.Intubated)%>%summarise( TotalCases=n(),deathRate = mean(Outcome == "FATAL"))
+
+kbl(data_byIntubated %>% arrange(desc(deathRate))) %>% 
+    kable_styling(full_width = F, font_size = 10)
+
+ggplot(data_byIntubated, aes(x = Ever.Intubated, y = deathRate, fill=Ever.Intubated)) +
+  geom_bar(stat = "identity", alpha = 0.7) +
+  labs(title = "Intubated vs. Death Rate", x = "Ever.Intubated", y = "Death Rate") +
+  theme_minimal()+
+  theme(axis.text.x=element_blank())
+
+```
+```{r, eval=FALSE}
+outcome_count = main_data %>% group_by(Outcome) %>% summarize(Count=n())
+kbl(outcome_count) %>% 
+    kable_styling(full_width = F, font_size = 10)
+```
+```{r, eval=FALSE}
+# Regression Analysis
+main_res = gen_filtered %>% filter(Outcome=="RESOLVED")
+main_fat = gen_filtered %>% filter(Outcome=="FATAL")
+set.seed(5)
+boot_res = main_res %>% sample_n(8000, replace=T)
+boot_fat = main_fat %>% sample_n(8000, replace=T)
+boot_data = rbind(boot_res, boot_fat)
+boot_data = boot_data %>% mutate(out = ifelse(Outcome == "FATAL", 1, 0))
+model = glm(out ~ Outbreak.Associated + Age.Group + Client.Gender +  Ever.Hospitalized + Ever.in.ICU + Ever.Intubated, family=binomial, data = boot_data)
+summary(model)
+confint(model)
+
+```
+```{r, eval=FALSE}
+# Cross Validation
+boot_data = boot_data %>% mutate(group_ind = sample(c("train","test"),
+                size=nrow(boot_data),
+                prob = c(0.7,0.3),
+                replace = T))
+train = boot_data %>% filter(group_ind == "train")
+test = boot_data %>% filter(group_ind == "test")
+model2 = glm(out ~ Outbreak.Associated + Age.Group + Client.Gender + Ever.Hospitalized + Ever.in.ICU + Ever.Intubated,
+            family=binomial, data = train)
+test = test %>% mutate(pred = predict(model, newdata = test, type="response"))
+
+```
+```{r, eval=FALSE}
+# ROC, AUC and Analysis
+roc_logit = roc(test$out ~ test$pred)
+ggroc(roc_logit, color="red", size = 2)
+auc(roc_logit)
+test = test %>% mutate(pred_out = ifelse(pred >= 0.9, 1, 0))
+conmat = table(test$out, test$pred_out)
+conmat
+sum(diag(conmat))/sum(conmat)
+```
+
+
